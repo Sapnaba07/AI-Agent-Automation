@@ -1,0 +1,194 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a85c741a-73c2-49eb-bd86-d83d98ba8100",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qNfe1zUHkpvEYfwW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.snippet }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Notificanes ",
+              "description": "If any notification comes on gmail from any plateform related to job offer,internship opportunity, interview invitation, then analyze it carefully and  reply ans apply accordingly."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "654348d8-24fd-4558-a50f-a54be68c83b4",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        208
+      ],
+      "id": "aa3c464b-bd33-4e0c-a50b-1cbe6e212e17",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "rqTNdAyRgpzn3fQ2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an intelligent job assistant helping Sapna Patel respond to professional emails. Based on the message below, classify the intent (e.g., internship offer, job alert, interview invitation, general update) and generate a polite, professional reply in English. Keep the tone enthusiastic, clear, and action-oriented. If needed, include her resume link: [https://docs.google.com/document/d/1sH1-68Nw1u4Q3ZnPNHYtt-gaS_4sL5BU/edit].\nyou have to give me reply in two type,one you give subject line and one in email respons\nEm{{ $json.snippet }}ail Message:\n\n\nReply:\n",
+              "role": "system"
+            }
+          ]
+        },
+        "simplify": false,
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        560,
+        0
+      ],
+      "id": "c02349c1-ce3f-40ea-955b-29bc45a82fb2",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "rqTNdAyRgpzn3fQ2",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.choices[0].message.content.subject }}",
+        "message": "={{ $json.choices[0].message.content.email_response }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        912,
+        0
+      ],
+      "id": "de6a4763-98d6-4f48-beb1-f1b2c68e0d66",
+      "name": "Create a draft",
+      "webhookId": "d93e552e-b508-4515-9a50-c57498ecb4ad",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "qNfe1zUHkpvEYfwW",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1a1eb085-ff6b-45ff-85c9-74f0abef0846",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bd954b6c17f091743a834e6d60eac3002a4dac1641be62d0c9d978f0fafe3b12"
+  },
+  "id": "0ah7z7isxQaCPFGi",
+  "tags": []
+}
